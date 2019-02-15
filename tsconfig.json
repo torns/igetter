@@ -1,0 +1,26 @@
+{
+	"compilerOptions":{
+		"module": "commonjs",
+		"baseUrl": "src",
+		"moduleResolution": "node",
+		"target": "es5",
+		"sourceMap": true,
+		"allowJs": true ,
+		"typeRoots": [
+      "./typings"
+    ],
+		"types": ["node", "superagent", "async", "uuid"],
+		"lib": ["es2017"]
+	},
+	
+	"include": [
+		"src/**/*",
+		"typings/index.d.ts"
+	],
+	"files": [
+    "typings/index.d.ts"
+  ],
+	"exclude": [
+    "node_modules"
+  ]
+}

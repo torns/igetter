@@ -5,11 +5,10 @@
 		"moduleResolution": "node",
 		"target": "es5",
 		"sourceMap": true,
-		"allowJs": true ,
 		"typeRoots": [
-      "./typings"
+      "./typings",
+			"./node_modules/@types"
     ],
-		"types": ["node", "superagent", "async", "uuid"],
 		"lib": ["es2017"]
 	},
 	

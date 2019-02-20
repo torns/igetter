@@ -38,7 +38,7 @@ declare global {
 	type fetchRequest = fetch['request']
 	type fetchResponse = fetch['response']
 	interface jobInfo{
-		job: any,
+		job: Job,
 		lastRun: number
 	}
 }

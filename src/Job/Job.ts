@@ -3,7 +3,9 @@ import Fetcher from 'Fetcher/Fetcher'
 import { job as logger } from 'utils/logger';
 
 export default abstract class Job extends Fetcher{
-	public active: boolean = false
+	public active: boolean = false // 标记任务是否正在执行
+	public minInterval: number = 10  // 最小执行间隔(分钟)
+	public JobName: string = 'Job' // 任务名称
 	constructor(){
 		super()
 	}
@@ -32,5 +34,6 @@ export default abstract class Job extends Fetcher{
 		logger.info(`Job request detach engine`)
 		this.engine.emit('detach', this)
 	}
+	// TODO: use()
 	abstract async run()
 }

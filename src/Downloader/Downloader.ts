@@ -22,6 +22,7 @@ export default class DownLoader extends EventEmitter{
 	regHandle(){
 		this.addListener('fetch', (fetch: fetch) => {
 			logger.info(`Downloader recieve Engine fetch: ${fetch.request.method} ${fetch.request.url}`)
+			// TODO: 优先处理来自同一个Job请求
 			this.queue.push(fetch, (res: fetchResponse) => {
 				logger.info(`Downloaded fetch ${fetch.request.method} ${fetch.request.url}: ${res.status}`)
 				this.returnFetch(fetch,res)

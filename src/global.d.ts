@@ -14,31 +14,26 @@ declare global {
 		success = 'SUCCESS', // 成功得到响应
 		faile = 'FAILE' // 超时或网络传输出问题
 	}
-	interface fetch {
-		fetcherID: string, // 负责该请求的 fetcher UUID
-		fetchID: string, // UUID 该请求的唯一标识
-		status: fetchStatus,
-		startTime: number, // 请求开始时间
-		endTime: number, // 返回时间
-		request: { // 请求信息
+	interface fetchRequest { // 请求信息
 			method ? : string, // 请求方法
-			url: URL, // 地址
+			url: URL | string, // 地址
 			headers ? : OutgoingHttpHeaders, // 请求头
 			query ? : object, // 参数
-			data ? : object // 数据
+			data ? : object, // 数据
 			retry ? : number, // 失败尝试次数
-			timeout ? : number // 超时
-		},
-		response ? : {
+			timeout ? : number, // 超时
+			_request?: any // 引用实际的request
+		}
+	interface fetchResponse {
 			status: number,
 			body: any, // 返回body
 			headers: IncomingHttpHeaders // 返回的头部
+			_response?: any // 引用实际的响应 
 		}
-	}
-	type fetchRequest = fetch['request']
-	type fetchResponse = fetch['response']
 	interface jobInfo{
 		job: Job,
-		lastRun: number
+		lastRun: number,
+		startTime: number,
+		endTime: number
 	}
 }

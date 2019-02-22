@@ -20,6 +20,7 @@
   "homepage": "https://github.com/LarenDorr/igetter-core#readme",
   "devDependencies": {
     "@types/async": "^2.4.0",
+    "@types/cheerio": "^0.22.10",
     "@types/node": "^11.9.0",
     "@types/superagent": "^3.8.6",
     "@types/uuid": "^3.4.4",
@@ -32,6 +33,7 @@
   },
   "dependencies": {
     "async": "^2.6.1",
+    "cheerio": "^1.0.0-rc.2",
     "deepmerge": "^3.1.0",
     "log4js": "^4.0.2",
     "superagent": "^4.1.0",

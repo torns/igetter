@@ -9,6 +9,8 @@ export default function resolveFetch(fetch: Fetch, cb: CallableFunction){
 	fetch.status = fetchStatus.request
 	let req = request(method, url)
 	req.then(res => {
+		fetch.request._request = req
+		fetch.response._response=  res
 		fetch.status = fetchStatus.success
 		fetch.endTime = Date.now()
 		let response = {} as fetchResponse

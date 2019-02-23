@@ -13,13 +13,13 @@ export default abstract class Job extends Fetcher{
 	}
 	async _run(engine: Engine.Engine){
 		this.attachEngine(engine)
-		logger.info(`Job start`)
+		logger.debug(`[job] ${this.JobName} ${this.id} start`)
 		await this.run()
-		logger.info(`Job end`)
+		logger.debug(`[job] ${this.JobName} ${this.id} end`)
 		this.detachEngine()
 	}
 	request(req: fetchRequest){
-		logger.info(`Job request ${req.method} ${req.url}`)
+		logger.info(`[job] ${this.JobName} ${this.id} request ${req.method} ${req.url}`)
 		let reqID = this.push(req)
 		return new Promise<Fetch>((resolve, reject) => {
 			this.addListener('downloaded', (resFetch: Fetch) => {
@@ -27,7 +27,7 @@ export default abstract class Job extends Fetcher{
 				if (reqID === resFetch.fetchID) {
 					queue.set(resFetch.fetchID, resFetch)
 					resolve(resFetch)
-					logger.info(`job recieve downloaded ${resFetch.fetchID}`)
+					logger.info(`[job] ${this.JobName} ${this.id} recieve downloaded ${resFetch.fetchID}`)
 				}
 			})
 		})
@@ -42,11 +42,11 @@ export default abstract class Job extends Fetcher{
 	attachEngine(engine: Engine.Engine){
 		this.engine = engine
 		this.engine.emit('attach', this)
-		logger.info(`Job request attach engine`)
+		logger.debug(`[job] ${this.JobName} ${this.id} attach engine`)
 	}
 	detachEngine(){
 		this.engine.emit('detach', this)
-		logger.info(`Job request detach engine`)
+		logger.debug(`[job] ${this.JobName} ${this.id} detach engine`)
 	}
 	// TODO: use()
 	abstract async run()

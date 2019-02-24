@@ -1,4 +1,6 @@
 import * as uuid from 'uuid/v1'
+import isURL = require('utils/isURL.js')
+import logger from 'utils/logger'
 
 const DEFAULT = {
 	request: {
@@ -18,6 +20,13 @@ export default class Fetch{
 	public request: fetchRequest = {} as fetchRequest // 封装的请求
 	public response: fetchResponse = {} as fetchResponse // 封装的响应
 	constructor(req: fetchRequest){
+		if (!req.url) {
+			logger.error(`fetch url undefnined!`)
+			req.url = undefined
+		} else if (!isURL(req.url)) {
+			logger.warn(`request's url (maybe) not a conventional URL!`)
+			req.url = undefined
+		}
 		this.request = {
 			...DEFAULT.request,
 			...req,

@@ -1,5 +1,5 @@
 import * as EventEmitter  from 'events'
-import Job from '../Job/Job'
+import Job from 'Job/Job'
 import DownLoader from 'Downloader/Downloader'
 import { engine as logger, job } from 'utils/logger'
 import Fetch from 'Fetcher/Fetch'

@@ -5,8 +5,6 @@ import Engine = require('Engine/Engine')
 import { fetcher as logger } from 'utils/logger'
 import Fetch from './Fetch'
 
-
-
 export default class Fetcher extends EventEmitter{
 	public id: string // 每个Fetcher(Job) 的 ID
 	private queue: Map<string, Fetch> = new Map // 存放请求信息

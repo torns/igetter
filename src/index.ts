@@ -3,7 +3,7 @@ import Job from 'Job/Job'
 import { URL } from 'url'
 import DownLoader from 'Downloader/Downloader';
 function isToday(date: Date){
-		let todayString = new Date('2019-2-21').toDateString()
+		let todayString = new Date('2019-2-22').toDateString()
 		let dateString = date.toDateString()
 		return todayString === dateString
 	}
@@ -16,7 +16,7 @@ class steamcn extends Job{
 	async run(){
 		let $ = this.$
 		let hotPages = await this.request({
-			url: new URL('https://steamcn.com/f161-1') // 热点聚焦板块
+			url: 'https://steamcn.com/f161-1' // 热点聚焦板块
 		})
 		let pageInfo = {
 			date: new Date,

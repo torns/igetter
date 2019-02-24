@@ -16,7 +16,7 @@ declare global {
 	}
 	interface fetchRequest { // 请求信息
 			method ? : string, // 请求方法
-			url: URL | string, // 地址
+			url: string, // 地址
 			headers ? : OutgoingHttpHeaders, // 请求头
 			query ? : object, // 参数
 			data ? : object, // 数据

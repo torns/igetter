@@ -21,8 +21,10 @@
   "homepage": "https://github.com/LarenDorr/igetter-core#readme",
   "devDependencies": {
     "@types/async": "^2.4.0",
+    "@types/blueimp-md5": "^2.7.0",
     "@types/cheerio": "^0.22.10",
     "@types/jest": "^24.0.6",
+    "@types/nedb": "^1.8.7",
     "@types/node": "^11.9.0",
     "@types/superagent": "^3.8.6",
     "@types/uuid": "^3.4.4",
@@ -40,7 +42,9 @@
     "cheerio": "^1.0.0-rc.2",
     "deepmerge": "^3.1.0",
     "log4js": "^4.0.2",
+    "nedb": "^1.8.0",
     "superagent": "^4.1.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "blueimp-md5": "^2.10.0"
   }
 }

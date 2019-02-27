@@ -31,6 +31,10 @@ configure({
 			appenders: ['out'],
 			level: 'error'
 		},
+		store: {
+			appenders: ['out'],
+			level: 'debug'
+		}
 	}
 })
 export default  getLogger()
@@ -38,3 +42,4 @@ export const engine = getLogger('engine')
 export const job = getLogger('job')
 export const fetcher = getLogger('fetcher')
 export const downloader = getLogger('downloader')
+export const store = getLogger('store')

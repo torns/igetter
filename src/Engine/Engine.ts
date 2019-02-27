@@ -49,6 +49,7 @@ export  class Engine extends EventEmitter{
 		}
 	}
 	addJob(job: Job){ // 添加任务的class
+		job.setID()
 		let jobInfo = {} as jobInfo
 		jobInfo.job = job // 任务
 		jobInfo.lastRun = Number(new Date(1998, 2, 16)) // 上一次运行时间
@@ -86,6 +87,7 @@ export  class Engine extends EventEmitter{
 			jobInfo.endTime = Date.now()
 			this.JobPool.set(job.id, jobInfo)
 			logger.info(`[job] ${job.id} ${job.JobName} done, spent time: ${jobInfo.endTime - jobInfo.startTime}`)
+			this.emit('job-done', job.id)
 		})
 	}
 }

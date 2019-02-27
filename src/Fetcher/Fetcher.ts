@@ -12,7 +12,6 @@ export default class Fetcher extends EventEmitter{
 	public $ = $
 	constructor(){
 		super()
-		this.id = uuid()
 		this.setMaxListeners(20)
 	}
 	push(req: fetchRequest){
@@ -28,7 +27,29 @@ export default class Fetcher extends EventEmitter{
 		}
 		return fetch.fetchID
 	}
+		request(req: fetchRequest){
+		// logger.info(`[job] ${this.JobName} ${this.id} request ${req.method} ${req.url}`)
+		let reqID = this.push(req)
+		return new Promise<Fetch>((resolve, reject) => {
+			this.addListener('downloaded', (resFetch: Fetch) => {
+				let queue = this.getQueue()
+				if (reqID === resFetch.fetchID) {
+					queue.set(resFetch.fetchID, resFetch)
+					resolve(resFetch)
+					// logger.info(`[job] ${this.JobName} ${this.id} recieve downloaded ${resFetch.fetchID}`)
+				}
+			})
+		})
+	}
+	requests(reqs: fetchRequest[]){
+		let requests = []
+		reqs.forEach(req => {
+			requests.push(this.request(req))
+		})
+		return Promise.all(requests)
+	}
 	getQueue(){
 		return this.queue
 	}
+	// TODO: support RSS
 }

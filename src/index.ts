@@ -1,15 +1,17 @@
 import {Engine} from 'Engine/Engine'
 import Job from 'Job/Job'
 import { URL } from 'url'
-import DownLoader from 'Downloader/Downloader';
+import DownLoader from 'Downloader/Downloader'
+
 function isToday(date: Date){
-		let todayString = new Date('2019-2-22').toDateString()
+		let todayString = new Date().toDateString()
 		let dateString = date.toDateString()
 		return todayString === dateString
 	}
 class steamcn extends Job{
 	public minInterval = 10
 	public JobName = 'SteamCN 每日新闻汇总'
+	public key = 'v0.1'
 	constructor(){
 		super()
 	}
@@ -41,16 +43,15 @@ class steamcn extends Job{
 				}
 			}
 		})
-		console.log(pageInfo.date, pageInfo.title, pageInfo.url)
-		// let links = ['https://steamcn.com/t465610-1-1', 'https://steamcn.com/t461904-1-1', 'https://steamcn.com/t466300-1-1', 'https://steamcn.com/t467147-1-1', 'https://steamcn.com/t330849-1-1']
-		// let fetchs: fetchRequest[] = []
-		// links.forEach(link => {
-		// 	fetchs.push({
-		// 		url: new URL(link)
-		// 	})
-		// })
-		// let d = Date.now()
-		// let res = await this.requests(fetchs)
+		return pageInfo
+	}
+	async save(res){
+		debugger
+		let store = this.store
+		let last = await store.getLast()
+		if (last === null || last.url !== res.url) {
+			await store.setLast(res)
+		}
 	}
 }
 let e = new Engine()

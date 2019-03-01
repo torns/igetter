@@ -15,34 +15,68 @@ export default abstract class Job extends Fetcher{
 	constructor(){
 		super()
 	}
-	async _run(engine: Engine.Engine){
-		debugger
-		this.attachEngine(engine) // 连接至引擎
+	/**
+	 * 运行任务，包括连接引擎，执行用户run函数，释放
+	 */
+	 async _run(engine: Engine.Engine){
+		this.attachEngine(engine)
 		logger.debug(`[job] ${this.JobName} ${this.id} start`)
 		let res = await this.run()
-		await this._save(res)
+		if (res) {
+			await this._save(res)	
+		}
 		logger.debug(`[job] ${this.JobName} ${this.id} end`)
 		this.detachEngine()
 	}
+	/**
+	 * 存储任务返回的数据
+	 */
 	async _save(res){
-		this.store = new Store(this.id)
-		this.store.connect() // 连接数据文件
 		await this.save(res)
-		this.store.disconnect() // 释放连接
+		// this.store.disconnect() // TODO: 释放连接
 	}
+	/**
+	 * 设置任务ID
+	 */
 	setID(){
 		this.id =  md5(this.JobName, this.key) // key + class.name 生成md5
+		this.initStore()
 	}
+	/**
+	 * 初始化store
+	 */
+	initStore(){
+		this.store = new Store(this.id)
+		this.store.connect()
+	}
+	/**
+	 * 连接至Engine
+	 */
 	attachEngine(engine: Engine.Engine){ // 连接至引擎
 		this.engine = engine
 		this.engine.emit('attach', this)
 		logger.debug(`[job] ${this.JobName} ${this.id} attach engine`)
 	}
+	/**
+	 * 从引擎释放
+	 */
 	detachEngine(){ // 释放
 		this.engine.emit('detach', this)
 		logger.debug(`[job] ${this.JobName} ${this.id} detach engine`)
 	}
 	// TODO: use()
-	abstract async run() // TODO:返回值
-	abstract async save(res)
+	/**
+	 * 发出请求，解析响应
+	 */
+	abstract async run(): Promise<any> // TODO:返回值
+	/**
+	 * 保存数据
+	 */
+	abstract async save(res: any): Promise<any>
+	/**
+	 * 是否推入待执行任务队列
+	 */
+	async willRun(){
+		return Promise.resolve(true)
+	}
 }

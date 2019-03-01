@@ -1,10 +1,10 @@
 import * as EventEmitter  from 'events'
 import Job from 'Job/Job'
 import DownLoader from 'Downloader/Downloader'
-import { engine as logger, job } from 'utils/logger'
 import Fetch from 'Fetcher/Fetch'
+import { engine as logger } from 'utils/logger'
 
-export  class Engine extends EventEmitter{
+export class Engine extends EventEmitter{
 	private num = 0
 	private activeJob: Map<string,Job> = new Map() // 正在执行的job
 	private waitJob: Job[] = [] // 等待执行的job
@@ -15,8 +15,11 @@ export  class Engine extends EventEmitter{
 		super()
 		this.regHandle()
 	}
-	run(){
-		this.schedul()
+	/**
+	 * 程序入口,调度、执行Job
+	 */
+	async run(){
+		await this.schedul()
 		this.activeJob.forEach(job => {
 			if (!job.active) {
 				job._run(this)
@@ -27,15 +30,23 @@ export  class Engine extends EventEmitter{
 			this.run()
 		}, 0)
 	}
-	schedul(){
+	/**
+	 * 将任务从任务池中取出至waitJob
+	 * 将waitJob推至activeJob中
+	 */
+	async schedul(){
 		if (this.JobPool.size !== 0 && this.waitJob.length < 10) { // TODO: 精确调度
-			this.JobPool.forEach(customJob => {
-				let interval = Date.now() - customJob.lastRun
-				interval /= 1000
-				if (interval > customJob.job.minInterval) { // 间隔请求
-					this.waitJob.push(customJob.job)
-					customJob.lastRun = Date.now()
-					logger.debug(`[job] ${customJob.job.JobName} waiting.`)
+			this.JobPool.forEach(async (jobInfo, key) => {
+				let customJob = jobInfo
+				let willRun = await customJob.job.willRun()
+				if (willRun) {
+					let interval = Date.now() - customJob.lastRun
+					interval /= 1000
+					if (interval > customJob.job.minInterval) { // 间隔请求
+						this.waitJob.push(customJob.job)
+						customJob.lastRun = Date.now()
+						logger.debug(`[job] ${customJob.job.JobName} waiting.`)
+					}
 				}
 			})
 		}
@@ -48,6 +59,10 @@ export  class Engine extends EventEmitter{
 			logger.info(`[job] ${job.JobName} ID: ${job.id} active.`)
 		}
 	}
+	/**
+	 * 添加任务至任务池
+	 * 确定任务ID，设置上一次运行时间
+	 */
 	addJob(job: Job){ // 添加任务的class
 		job.setID()
 		let jobInfo = {} as jobInfo
@@ -56,9 +71,15 @@ export  class Engine extends EventEmitter{
 		this.JobPool.set(job.id, jobInfo)
 		logger.debug(`[job] ${job.JobName} ${job.id} was added.`)
 	}
+	/**
+	 * 获取ActiveJob
+	 */
 	getActiveJob(){
 		return this.activeJob
 	}
+	/**
+	 * 注册fetch、downloaded、attach、detach事件
+	 */
 	regHandle(){
 		logger.debug(`Register engine's event`)
 		this.addListener('fetch', (fetch: Fetch) => {

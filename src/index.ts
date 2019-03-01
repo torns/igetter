@@ -1,13 +1,12 @@
-import {Engine} from 'Engine/Engine'
+import { Engine } from 'Engine/Engine'
 import Job from 'Job/Job'
-import { URL } from 'url'
 import DownLoader from 'Downloader/Downloader'
 
-function isToday(date: Date){
-		let todayString = new Date().toDateString()
-		let dateString = date.toDateString()
-		return todayString === dateString
-	}
+function isToday(date: Date) {
+	let todayString = new Date().toDateString()
+	let dateString = date.toDateString()
+	return todayString === dateString
+}
 class steamcn extends Job{
 	public minInterval = 10
 	public JobName = 'SteamCN 每日新闻汇总'
@@ -43,17 +42,30 @@ class steamcn extends Job{
 				}
 			}
 		})
-		return pageInfo
+		if (pageInfo.url) {
+			return pageInfo
+		}
+		return false
 	}
 	async save(res){
-		debugger
+		console.log(res)
 		let store = this.store
 		let last = await store.getLast()
 		if (last === null || last.url !== res.url) {
 			await store.setLast(res)
 		}
 	}
+	async willRun(){
+		let store = this.store
+		let res = await store.getLast()
+		if (res && isToday(res.date)) {
+			return false
+		} else {
+			return true
+		}
+	}
 }
+debugger
 let e = new Engine()
 e.addJob(new steamcn())
 let d = new DownLoader()

@@ -33,7 +33,7 @@ configure({
 		},
 		store: {
 			appenders: ['out'],
-			level: 'debug'
+			level: 'error'
 		}
 	}
 })

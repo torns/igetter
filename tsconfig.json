@@ -2,10 +2,17 @@
 	"compilerOptions":{
 		"module": "commonjs",
 		"baseUrl": "src",
+		"paths": {
+			"*": [
+        "*"
+      ]
+		},
 		"moduleResolution": "node",
 		"target": "es5",
 		"sourceMap": true,
+		"downlevelIteration": true,
 		"typeRoots": [
+			"./src/global.d.ts",
       "./typings",
 			"./node_modules/@types"
     ],
@@ -14,8 +21,7 @@
 	
 	"include": [
 		"src/**/*",
-		"test/**/*",
-		"typings/index.d.ts"
+		"test/**/*"
 	],
 	"files": [
     "typings/index.d.ts"

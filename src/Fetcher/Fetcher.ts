@@ -7,11 +7,15 @@ import Fetch from './Fetch'
 export default class Fetcher extends EventEmitter{
 	public id: string // 每个Fetcher(Job) 的 ID
 	private queue: Map<string, Fetch> = new Map // 存放请求信息
+	private callBacks: Map<string, Function> = new Map
 	public engine: Engine.Engine // 引用连接的调度引擎
-	public $ = $
+	public $ = $ // 解析库
 	constructor(){
 		super()
-		this.setMaxListeners(20)
+		this.addListener('downloaded', (resFetch: Fetch) => {
+			let cb = this.callBacks.get(resFetch.fetchID)
+			cb(resFetch)
+		})
 	}
 	/**
 	 * 构造fetch，交付给Engine
@@ -25,35 +29,38 @@ export default class Fetcher extends EventEmitter{
 			this.engine.emit('fetch', fetch)
 			logger.info(`[Fetcher] ${this.id} send fetch to Engine ${fetch.request.method} ${fetch.request.url}`)
 		} else {
-			logger.error(`Engine not set!`)
+			logger.error(`Engine not attach!`)
 		}
 		return fetch.fetchID
 	}
 	/**
-	 * 发出请求，注册事件等待返回
+	 * 向回调函数map添加某个fetch的回调
 	 */
-	request(req: fetchRequest){
-	// logger.info(`[job] ${this.JobName} ${this.id} request ${req.method} ${req.url}`)
-	let reqID = this.push(req)
-	return new Promise<Fetch>((resolve, reject) => {
-		this.addListener('downloaded', (resFetch: Fetch) => {
-			let queue = this.getQueue()
-			if (reqID === resFetch.fetchID) {
-				queue.set(resFetch.fetchID, resFetch)
-				resolve(resFetch)
-				// logger.info(`[job] ${this.JobName} ${this.id} recieve downloaded ${resFetch.fetchID}`)
-			}
-		})
-	})
+	private waitDownload(fetchID: Fetch['fetchID'], cb: Function){
+		this.callBacks.set(fetchID, cb)
 	}
 	/**
-	 * 请求一组数据
+	 * 发出请求，等待Engine返回结果
 	 */
-	// TODO: 使用事件通知结果
-	requests(reqs: fetchRequest[]){
+	async request(req: fetchRequest, cb?: Function){
+		let fetchID = this.push(req)
+		return new Promise<Fetch>((resolve, reject) => {
+			this.waitDownload(fetchID, function(resFetch: Fetch){
+				if (cb) {
+					cb(resFetch)
+				}
+				resolve(resFetch)
+			})
+		})
+	}
+	/**
+	 * 请求一组数据,可设置回调处理每个结果,
+	 * 也可以等待所有请求统一处理
+	 */
+	requests(reqs: fetchRequest[], cb?: Function){
 		let requests = []
 		reqs.forEach(req => {
-			requests.push(this.request(req))
+			requests.push(this.request(req, cb))
 		})
 		return Promise.all(requests)
 	}

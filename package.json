@@ -27,6 +27,7 @@
     "@types/nedb": "^1.8.7",
     "@types/node": "^11.9.0",
     "@types/superagent": "^3.8.6",
+    "@types/tapable": "^1.0.4",
     "@types/uuid": "^3.4.4",
     "jest": "^24.1.0",
     "ts-jest": "^24.0.0",
@@ -41,12 +42,13 @@
   },
   "dependencies": {
     "async": "^2.6.1",
+    "blueimp-md5": "^2.10.0",
     "cheerio": "^1.0.0-rc.2",
     "deepmerge": "^3.1.0",
     "log4js": "^4.0.2",
     "nedb": "^1.8.0",
     "superagent": "^4.1.0",
-    "uuid": "^3.3.2",
-    "blueimp-md5": "^2.10.0"
+    "tapable": "^1.1.1",
+    "uuid": "^3.3.2"
   }
 }

@@ -1,4 +1,3 @@
-import * as $ from 'cheerio'
 import * as EventEmitter  from 'events'
 import Engine = require('Engine/Engine')
 import { fetcher as logger } from 'utils/logger'
@@ -9,7 +8,7 @@ export default class Fetcher extends EventEmitter{
 	private queue: Map<string, Fetch> = new Map // 存放请求信息
 	private callBacks: Map<string, Function> = new Map
 	public engine: Engine.Engine // 引用连接的调度引擎
-	public $ = $ // 解析库
+	
 	constructor(){
 		super()
 		this.addListener('downloaded', (resFetch: Fetch) => {

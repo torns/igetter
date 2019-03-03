@@ -39,5 +39,4 @@ export default class Fetch{
 	setFetcherID(ID: string){
 		this.fetcherID = ID
 	}
-	// TODO: random UA as plugin
 }

@@ -3,6 +3,7 @@ import Fetch from 'Fetcher/Fetch'
 import { downloader as logger } from 'utils/logger'
 
 export default function resolveFetch(fetch: Fetch, cb: CallableFunction){
+	// TODO: handle
 	let fetchRequest = fetch.request
 	let method = fetchRequest.method
 	let url = fetchRequest.url.toString()

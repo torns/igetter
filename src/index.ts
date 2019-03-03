@@ -1,11 +1,26 @@
 import { Engine } from 'Engine/Engine'
 import Job from 'Job/Job'
 import DownLoader from 'Downloader/Downloader'
+import Extension from 'Extension/Extension'
 
-function isToday(date: Date) {
-	let todayString = new Date().toDateString()
+export {
+	Engine,
+	Job,
+	DownLoader,
+	Extension
+}
+
+function isToday(date) {
+	let todayString = new Date('2019-3-1').toDateString()
 	let dateString = date.toDateString()
 	return todayString === dateString
+}
+class getHeaders extends Extension{
+	apply(hooks){
+		hooks.beforeFetch.tap('get-headers', (fetch) => {
+			console.log(fetch.request.headers)
+		})
+	}
 }
 class steamcn extends Job{
 	public minInterval = 10
@@ -43,7 +58,7 @@ class steamcn extends Job{
 			}
 		})
 		if (pageInfo.url) {
-			return pageInfo
+			return false
 		}
 		return false
 	}
@@ -55,18 +70,49 @@ class steamcn extends Job{
 			await store.setLast(res)
 		}
 	}
+	// async willRun(){
+	// 	let store = this.store
+	// 	let res = await store.getLast()
+	// 	if (res && isToday(res.date)) {
+	// 		return false
+	// 	} else {
+	// 		return true
+	// 	}
+	// }
+}
+class steamcnMulti extends Job{
+	public minInterval = 10
+	public JobName = 'SteamCN 每日新闻汇总'
+	public key = 'v0.2'
+	constructor(){
+		super()
+	}
+	async run(){
+		let pagesUrl = [
+			'https://steamcn.com/t469378-1-1',
+			'https://steamcn.com/t468824-1-1',
+			'https://steamcn.com/t469084-1-1',
+			'https://steamcn.com/t467051-1-1'
+		]
+		let pagesFetch = pagesUrl.map(url => {
+			return {
+				url: url
+			}
+		})
+		let res = await this.requests(pagesFetch, (resFetch) => {
+			console.log(resFetch.status)
+		})
+		return false
+	}
+	async save(res){
+		
+	}
 	async willRun(){
-		let store = this.store
-		let res = await store.getLast()
-		if (res && isToday(res.date)) {
-			return false
-		} else {
-			return true
-		}
+		return true
 	}
 }
-debugger
 let e = new Engine()
+e.use(new getHeaders)
 e.addJob(new steamcn())
 let d = new DownLoader()
 d.attachEngine(e)

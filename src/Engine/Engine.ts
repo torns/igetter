@@ -1,16 +1,22 @@
+import { SyncHook } from 'tapable'
 import * as EventEmitter  from 'events'
 import Job from 'Job/Job'
 import DownLoader from 'Downloader/Downloader'
 import Fetch from 'Fetcher/Fetch'
 import { engine as logger } from 'utils/logger'
+import Extension from 'Extension/Extension'
 
 export class Engine extends EventEmitter{
-	private num = 0
+	private num = 0 // 已执行Job
 	private activeJob: Map<string,Job> = new Map() // 正在执行的job
 	private waitJob: Job[] = [] // 等待执行的job
 	private JobPool: Map<string, jobInfo> = new Map() // 所有的Job
 	private downloader: DownLoader // downloader
-	
+	public hooks:Hooks = {
+		beforeFetch: new SyncHook(['fetch']),
+		fetching: new SyncHook(['request']),
+		afterFetch: new SyncHook(['fetch'])
+	}
 	constructor(){
 		super()
 		this.regHandle()
@@ -78,16 +84,21 @@ export class Engine extends EventEmitter{
 		return this.activeJob
 	}
 	/**
-	 * 注册fetch、downloaded、attach、detach事件
+	 * 添加插件
 	 */
+	use(extension : Extension){
+		extension.apply(this.hooks)
+	}
 	regHandle(){
 		logger.debug(`Register engine's event`)
-		this.addListener('fetch', (fetch: Fetch) => {
+		this.addListener('fetch', (fetch: Fetch) => { // Job 发出的请求
 			logger.debug(`Engine recieve [fetcher] ${fetch.fetcherID} [fetch] ${fetch.fetchID} ${fetch.request.method} ${fetch.request.url}`)
+			this.hooks.beforeFetch.call(fetch)
 			this.downloader.emit('fetch', fetch)
 		})
-		this.addListener('downloaded', (fetch: Fetch) => {
+		this.addListener('downloaded', (fetch: Fetch) => { // Downloader 下载完成
 			logger.debug(`Engine recieve [downloader] downloaded: ${fetch.fetchID} ${fetch.request.method} ${fetch.request.url}: ${fetch.response.status}`)
+			this.hooks.afterFetch.call(fetch)
 			this.activeJob.get(fetch.fetcherID).emit('downloaded', fetch)
 		})
 		this.addListener('attach', (instance: Job | DownLoader) => {
@@ -101,7 +112,6 @@ export class Engine extends EventEmitter{
 		})
 		this.addListener('detach', (job: Job) => {
 			logger.debug(`[job] ${job.id} ${job.JobName} was detached`)
-			logger.debug(`Runned Job count: ${this.num++}`)
 			job.active = false
 			this.activeJob.delete(job.id)
 			let jobInfo = this.JobPool.get(job.id)

@@ -1,31 +1,24 @@
 {
 	"compilerOptions":{
 		"module": "commonjs",
-		"baseUrl": "src",
-		"paths": {
-			"*": [
-        "*"
-      ]
-		},
 		"moduleResolution": "node",
 		"target": "es5",
 		"sourceMap": true,
 		"downlevelIteration": true,
 		"typeRoots": [
-			"./src/global.d.ts",
-      "./typings",
+			"src/types/global.ts",
 			"./node_modules/@types"
     ],
-		"lib": ["es2017"]
+		"lib": ["es2017"],
+		"outDir": "./dist/",
+		"declaration": true,
+		"declarationDir": "./dist"
 	},
 	
 	"include": [
 		"src/**/*",
 		"test/**/*"
 	],
-	"files": [
-    "typings/index.d.ts"
-  ],
 	"exclude": [
     "node_modules"
   ]

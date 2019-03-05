@@ -1,10 +1,11 @@
 import { queue, AsyncQueue } from 'async'
 import * as EventEmitter  from 'events'
-import { Engine } from 'Engine/Engine'
-import Fetch from 'Fetcher/Fetch'
-import { downloader as logger } from 'utils/logger'
-import resolveFetch from './resolveFetch'
-
+import Engine from '../Engine/Engine'
+import Fetch from '../Fetcher/Fetch'
+import { downloader as logger } from '../utils/logger'
+import createRequest from './RequestBuilder'
+import createRespone from './ResponseBuilder'
+import createError from './ErrorBuilder';
 
 export default class DownLoader extends EventEmitter{
 	private engine: Engine
@@ -15,43 +16,48 @@ export default class DownLoader extends EventEmitter{
 		this.regHandle()
 	}
 	/**
-	 * 下载器初始化，初始下载队列
+	 * init download queue
 	 */
-	init(){
+	private init(){
+		// TODO: support priority queue
 		this.queue = queue((fetch: Fetch, cb: CallableFunction) => { // async 异步下载队列 限制并发请求
-			resolveFetch(fetch, cb)
+			let request = createRequest(fetch.request)
+			this.engine.hooks.fetching.call(request)
+			request
+				.then((res) => {
+					createRespone(res, fetch.response)
+					cb()
+				})
+				.catch(err => {
+					debugger
+					fetch.error = {} as fetchError
+					createError(err, fetch.error)
+					cb()
+				})
 		}, 10)
 		logger.info(`[downloader] init download queue.`)
 	}
 	/**
-	 * 注册fetch事件
+	 * register event
 	 */
-	regHandle(){
+	private regHandle(){
 		this.addListener('fetch', (fetch: Fetch) => {
 			logger.info(`[downloader] recieve Engine [fetch] ${fetch.fetchID} ${fetch.request.method} ${fetch.request.url}.`)
 			let action = this.queue.push
-			// if (this.isRequesting(fetch.fetcherID)) { // 当Job正在运行时,优先处理其剩余请求
-			// 	action = this.queue.unshift
-			// }
-			action(fetch, (res: fetchResponse) => {
+			action(fetch, () => {
 				logger.info(`[downloader] downloaded fetch ${fetch.fetchID} ${fetch.request.method} ${fetch.request.url}`)
-				this.returnFetch(fetch, res)
+				this.returnFetch(fetch)
 			})
 		})
 	}
-	// isRequesting(fetcherID: string): boolean{
-	// 	let activeJob = this.engine.getActiveJob()
-	// 	return activeJob.has(fetcherID)
-	// }
 	/**
-	 * 将已请求的fetch返回Engine
+	 * emit downloaded fetch to engine
 	 */
-	returnFetch(fetch: Fetch, res: fetchResponse){
-		fetch.response = res
+	private returnFetch(fetch: Fetch){
 		this.engine.emit('downloaded', fetch)
 	}
 	/**
-	 * 连接Engine
+	 * atach Engine
 	 */
 	attachEngine(engine: Engine){
 		this.engine = engine

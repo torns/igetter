@@ -1,15 +1,16 @@
 import * as DataStore from 'nedb'
 import { promisify } from 'util'
-import { store as logger } from 'utils/logger'
+import { store as logger } from '../utils/logger'
 
 /**
- * 将await promise 结果转化成 [error, data] 形式, 方便书写
+ * convert 'await promise' result to [error, data] style
  */
 async function to(p: Promise<any>){
 	return p.then(data => [null, data]).catch(err => [err, null])
 }
+
 /**
- * 工具函数, 将NeDB回调函数形式转换为async/await形式
+ * util function, convert CPS style to async/await style
  */
 function wrap(fn: Function) {
 	return async function(...args) {
@@ -24,8 +25,8 @@ function wrap(fn: Function) {
 }
 
 export default class Store {
-	private db: DataStore // NeDB 实例
-	private path: string // 数据文件路径
+	private db: DataStore // NeDB instance
+	private path: string // store file path
 	private id: string // Job id
 	constructor(id: string){
 		this.id = id
@@ -33,7 +34,7 @@ export default class Store {
 		this.path = path
 	}
 	/**
-	 * 实例化Store
+	 * Instantiation store
 	 */
 	connect() {
 		this.db = new DataStore({
@@ -47,14 +48,14 @@ export default class Store {
 		})
 	}
 	/**
-	 * 释放Store实例
+	 * release store instance
 	 */
 	disconnect(){
 		delete this.db
 		logger.debug(`[job] ID: ${this} disconnected Store.`)
 	}
 	/**
-	 * 插入数据
+	 * insert doc like mongoDB
 	 */
 	async insert(doc: any){
 		let res = wrap(this.db.insert.bind(this.db))(doc)
@@ -62,25 +63,25 @@ export default class Store {
 		return res
 	}
 	/**
-	 * 查找数据
+	 * find doc like mongoDB
 	 */
 	async find(query: any){
 		return wrap(this.db.find.bind(this.db))(query)
 	}
 	/**
-	 * 查找数据，仅返回一个结果
+	 * find doc, return one result
 	 */
 	async findOne(query: any){
 		return wrap(this.db.findOne.bind(this.db))(query)
 	}
 	/**
-	 * 计数
+	 * count query
 	 */
 	async count(query: any){
 		return wrap(this.db.count.bind(this.db))(query)
 	}
 	/**
-	 * 更新数据
+	 * update doc
 	 */
 	async update(query: any, update: any, options?: DataStore.UpdateOptions){ // 更新
 		let res = wrap(this.db.update.bind(this.db))(query, update, options)
@@ -88,7 +89,7 @@ export default class Store {
 		return res
 	}
 	/**
-	 * 删除数据
+	 * remove doc
 	 */
 	async remove(query: any, options?: DataStore.RemoveOptions){ // 删除
 		let res = wrap(this.db.remove.bind(this.db))(query, options)
@@ -96,13 +97,13 @@ export default class Store {
 		return res
 	}
 	/**
-	 * 获取上一次存储内容
+	 * get last store doc
 	 */
 	async getLast(){
 		return await this.findOne({_isLast: true})
 	}
 	/**
-	 * 存储最新数据
+	 * set latest store doc
 	 */
 	async setLast(doc: any){
 		let lastID = (await this.getLast())
@@ -118,7 +119,7 @@ export default class Store {
 		logger.debug(`[job] ID: ${this} Store setLast.`)
 	}
 	/**
-	 * 获取全部数据
+	 * get all docs
 	 */
 	async getAll(){
 		return await this.find({})

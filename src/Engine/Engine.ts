@@ -1,16 +1,16 @@
 import { SyncHook } from 'tapable'
 import * as EventEmitter  from 'events'
-import Job from 'Job/Job'
-import DownLoader from 'Downloader/Downloader'
-import Fetch from 'Fetcher/Fetch'
-import { engine as logger } from 'utils/logger'
-import Extension from 'Extension/Extension'
+import Job from '../Job/Job'
+import DownLoader from '../Downloader/Downloader'
+import Fetch from '../Fetcher/Fetch'
+import { engine as logger } from '../utils/logger'
+import Plugin from '../Plugin/Plugin'
 
-export class Engine extends EventEmitter{
-	private num = 0 // 已执行Job
-	private activeJob: Map<string,Job> = new Map() // 正在执行的job
+export default class Engine extends EventEmitter{
+	private num = 0 // compeleted job count
+	private activeJob: Map<string,Job> = new Map() // executing job
 	private waitJob: Job[] = [] // 等待执行的job
-	private JobPool: Map<string, jobInfo> = new Map() // 所有的Job
+	private JobPool: Map<string, jobInfo> = new Map() // all job
 	private downloader: DownLoader // downloader
 	public hooks:Hooks = {
 		beforeFetch: new SyncHook(['fetch']),
@@ -22,14 +22,14 @@ export class Engine extends EventEmitter{
 		this.regHandle()
 	}
 	/**
-	 * 程序入口,调度、执行Job
+	 * start engine, schedule, execute job
 	 */
 	async run(){
-		await this.schedul()
+		this.schedul()
 		this.activeJob.forEach(job => {
-			if (!job.active) {
+			if (!job.isActive) {
+				job.active()
 				job._run(this)
-				job.active = true
 			}
 		})
 		setTimeout(() => {
@@ -37,21 +37,24 @@ export class Engine extends EventEmitter{
 		}, 0)
 	}
 	/**
-	 * 将任务从任务池中取出至waitJob
-	 * 将waitJob推至activeJob中
+	 * push job to waitJob queue from JobPool,
+	 * push job to execute queue from waitJob
 	 */
 	async schedul(){
 		if (this.JobPool.size !== 0 && this.waitJob.length < 10) { // TODO: 精确调度
 			this.JobPool.forEach(async (jobInfo, key) => {
-				let customJob = jobInfo
-				let willRun = await customJob.job.willRun()
+				let {job, lastRun} = jobInfo
+				if (job.isActive) {
+					return
+				}
+				let willRun = await job.willRun()
 				if (willRun) {
-					let interval = Date.now() - customJob.lastRun
+					let interval = Date.now() - lastRun
 					interval /= 1000
-					if (interval > customJob.job.minInterval) { // 间隔请求
-						this.waitJob.push(customJob.job)
-						customJob.lastRun = Date.now()
-						logger.debug(`[job] ${customJob.job.JobName} waiting.`)
+					if (interval > job.minInterval) { // interval request prevent server ban ip
+						this.waitJob.push(job)
+						jobInfo.lastRun = Date.now()
+						logger.debug(`[job] ${job.JobName} waiting.`)
 					}
 				}
 			})
@@ -65,43 +68,46 @@ export class Engine extends EventEmitter{
 			logger.info(`[job] ${job.JobName} ID: ${job.id} active.`)
 		}
 	}
+	// TODO: jobinfo JobPoll independence
 	/**
-	 * 添加任务至任务池
-	 * 确定任务ID，设置上一次运行时间
+	 * add job to JobPoll with job info
 	 */
-	addJob(job: Job){ // 添加任务的class
+	addJob(job: Job){
 		job.setID()
 		let jobInfo = {} as jobInfo
-		jobInfo.job = job // 任务
-		jobInfo.lastRun = Number(new Date(1998, 2, 16)) // 上一次运行时间
+		jobInfo.job = job
+		jobInfo.lastRun = Number(new Date(1998, 2, 16))
 		this.JobPool.set(job.id, jobInfo)
-		logger.debug(`[job] ${job.JobName} ${job.id} was added.`)
+		logger.debug(`[job] ${job.JobName} ${job.id} added.`)
 	}
 	/**
-	 * 获取ActiveJob
+	 * get active job queue
 	 */
 	getActiveJob(){
 		return this.activeJob
 	}
 	/**
-	 * 添加插件
+	 * add plugin to engine
 	 */
-	use(extension : Extension){
-		extension.apply(this.hooks)
+	use(Plugin : Plugin){
+		Plugin._apply(this.hooks)
 	}
-	regHandle(){
+	/**
+	 * register event
+	 */
+	private regHandle(){
 		logger.debug(`Register engine's event`)
-		this.addListener('fetch', (fetch: Fetch) => { // Job 发出的请求
+		this.addListener('fetch', (fetch: Fetch) => { // Job fetch resuest
 			logger.debug(`Engine recieve [fetcher] ${fetch.fetcherID} [fetch] ${fetch.fetchID} ${fetch.request.method} ${fetch.request.url}`)
 			this.hooks.beforeFetch.call(fetch)
 			this.downloader.emit('fetch', fetch)
 		})
-		this.addListener('downloaded', (fetch: Fetch) => { // Downloader 下载完成
+		this.addListener('downloaded', (fetch: Fetch) => { // Downloader return response
 			logger.debug(`Engine recieve [downloader] downloaded: ${fetch.fetchID} ${fetch.request.method} ${fetch.request.url}: ${fetch.response.status}`)
 			this.hooks.afterFetch.call(fetch)
 			this.activeJob.get(fetch.fetcherID).emit('downloaded', fetch)
 		})
-		this.addListener('attach', (instance: Job | DownLoader) => {
+		this.addListener('attach', (instance: Job | DownLoader) => { // Job and Downloader attach Engine
 			if (instance instanceof Job) {
 				this.activeJob.set(instance.id, instance)
 				logger.debug(`[job] ${instance.id} ${instance.JobName} attached engine`)
@@ -112,17 +118,17 @@ export class Engine extends EventEmitter{
 		})
 		this.addListener('detach', (job: Job) => {
 			logger.debug(`[job] ${job.id} ${job.JobName} was detached`)
-			job.active = false
+			job.inactive()
 			this.activeJob.delete(job.id)
 			let jobInfo = this.JobPool.get(job.id)
 			jobInfo.endTime = Date.now()
 			this.JobPool.set(job.id, jobInfo)
 			logger.info(`[job] ${job.id} ${job.JobName} done, spent time: ${jobInfo.endTime - jobInfo.startTime}`)
-			this.emit('job-done', job.id)
 		})
 	}
 }
 process.on('unhandledRejection', (reason: Error|any, p: Promise<any>) => {
-	logger.error(`unhandled rejection ${p}, reason: ${reason}`)
+	debugger
+	logger.error(`unhandled rejection, reason: ${reason}`)
 })
 

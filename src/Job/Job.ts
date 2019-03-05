@@ -1,28 +1,32 @@
 import * as $ from 'cheerio'
-import Engine = require('Engine/Engine')
-import Fetcher from 'Fetcher/Fetcher'
-import { job as logger } from 'utils/logger'
+import Fetcher from '../Fetcher/Fetcher'
+import { job as logger } from '../utils/logger'
 import md5 = require('blueimp-md5')
-import Store from 'Store/Store'
+import Store from '../Store/Store'
+import Engine from '../Engine/Engine';
 
+/**
+ * job
+ */
 export default abstract class Job extends Fetcher{
-	public active: boolean = false // 标记任务是否正在执行
-	public minInterval: number = 10  // 最小执行间隔(分钟)
-	public JobName: string = 'Job' // 任务名称
-	public abstract key:string // 生成id的盐值
-	public $ = $ // 解析库
+	public isActive: boolean = false // job whether run
+	public minInterval: number = 10  // min run interval (s)
+	public JobName: string = 'Job' // job name
+	public abstract majorVer: string // job majorVer, decide store files name
+	public abstract minorVer: string // job minorVer
+	public $ = $ // analyze lib
 	public store: Store
 	constructor(){
 		super()
 	}
 	/**
-	 * 运行任务，包括连接引擎，执行用户run函数，释放
+	 * start job, include attach engine, run user script, save store, detach engine
+	 * NOT CALL
 	 */
-	 async _run(engine: Engine.Engine){
+	 async _run(engine: Engine){
 		this.attachEngine(engine)
 		logger.debug(`[job] ${this.JobName} ${this.id} start`)
 		let res = await this.run()
-		debugger
 		if (res) {
 			await this._save(res)	
 		}
@@ -30,51 +34,60 @@ export default abstract class Job extends Fetcher{
 		this.detachEngine()
 	}
 	/**
-	 * 存储任务返回的数据
+	 * save store form job run
+	 * NOT CALL
 	 */
 	async _save(res){
 		await this.save(res)
-		// this.store.disconnect() // TODO: 释放连接
+		// this.store.disconnect() // TODO: 重构store初始顺序
 	}
-	/**
-	 * 设置任务ID
-	 */
-	setID(){
-		this.id =  md5(this.JobName, this.key) // key + class.name 生成md5
-		this.initStore()
-	}
-	/**
-	 * 初始化store
-	 */
-	initStore(){
+	active(){
 		this.store = new Store(this.id)
 		this.store.connect()
+		this.isActive = true
+	}
+	inactive(){
+		delete this.store
+		this.isActive = false
 	}
 	/**
-	 * 连接至Engine
+	 * set job id
 	 */
-	attachEngine(engine: Engine.Engine){ // 连接至引擎
+	setID(){
+		this.id =  md5(this.JobName, this.majorVer) // key + class.name 生成md5
+	}
+	// /**
+	//  * init store 
+	//  */
+	// initStore(){
+	// 	this.store = new Store(this.id)
+	// 	this.store.connect()
+	// }
+	/**
+	 * attach engine
+	 */
+	attachEngine(engine: Engine){
 		this.engine = engine
 		this.engine.emit('attach', this)
 		logger.debug(`[job] ${this.JobName} ${this.id} attach engine`)
 	}
 	/**
-	 * 从引擎释放
+	 * detach engine
 	 */
-	detachEngine(){ // 释放
+	detachEngine(){
 		this.engine.emit('detach', this)
 		logger.debug(`[job] ${this.JobName} ${this.id} detach engine`)
 	}
 	/**
-	 * 发出请求，解析响应
+	 * request url, resolve response, return result
 	 */
 	abstract async run(): Promise<any>
 	/**
-	 * 保存数据
+	 * save job run result
 	 */
 	abstract async save(res: any): Promise<any>
 	/**
-	 * 是否推入待执行任务队列
+	 * whether push to wait job queue
 	 */
 	async willRun(){
 		return Promise.resolve(true)

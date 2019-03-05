@@ -1,13 +1,13 @@
 import * as EventEmitter  from 'events'
-import Engine = require('Engine/Engine')
-import { fetcher as logger } from 'utils/logger'
+import { fetcher as logger } from '../utils/logger'
 import Fetch from './Fetch'
+import Engine from '../Engine/Engine'
 
 export default class Fetcher extends EventEmitter{
-	public id: string // 每个Fetcher(Job) 的 ID
-	private queue: Map<string, Fetch> = new Map // 存放请求信息
+	public id: string // fetcher id
+	private queue: Map<string, Fetch> = new Map // save this fetcher's fetch
 	private callBacks: Map<string, Function> = new Map
-	public engine: Engine.Engine // 引用连接的调度引擎
+	public engine: Engine
 	
 	constructor(){
 		super()
@@ -17,7 +17,7 @@ export default class Fetcher extends EventEmitter{
 		})
 	}
 	/**
-	 * 构造fetch，交付给Engine
+	 * construct fetch, emit to engine
 	 */
 	private push(req: fetchRequest): Fetch['fetchID']{
 		logger.info(`[Fetcher] ${this.id} recieve job request ${req.method || 'GET'} ${req.url}`)
@@ -33,13 +33,13 @@ export default class Fetcher extends EventEmitter{
 		return fetch.fetchID
 	}
 	/**
-	 * 向回调函数map添加某个fetch的回调
+	 * wait engine return result
 	 */
 	private waitDownload(fetchID: Fetch['fetchID'], cb: Function){
 		this.callBacks.set(fetchID, cb)
 	}
 	/**
-	 * 发出请求，等待Engine返回结果
+	 * request fetch
 	 */
 	async request(req: fetchRequest, cb?: Function){
 		let fetchID = this.push(req)
@@ -53,8 +53,7 @@ export default class Fetcher extends EventEmitter{
 		})
 	}
 	/**
-	 * 请求一组数据,可设置回调处理每个结果,
-	 * 也可以等待所有请求统一处理
+	 * reuqest multi fetch, can set callback for every fetch downloaded
 	 */
 	requests(reqs: fetchRequest[], cb?: Function){
 		let requests = []
@@ -64,7 +63,7 @@ export default class Fetcher extends EventEmitter{
 		return Promise.all(requests)
 	}
 	/**
-	 * 获得fetcher下请求队列
+	 * get fetch queue
 	 */
 	getQueue(){
 		return this.queue

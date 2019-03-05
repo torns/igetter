@@ -1,6 +1,6 @@
 import * as uuid from 'uuid/v1'
-import isURL = require('utils/isURL.js')
-import logger from 'utils/logger'
+import isURL = require('../utils/isURL.js')
+import logger from '../utils/logger'
 
 const DEFAULT = {
 	request: {
@@ -19,6 +19,7 @@ export default class Fetch{
 	public endTime: number = Infinity // fetch 结束时间
 	public request: fetchRequest = {} as fetchRequest // 封装的请求
 	public response: fetchResponse = {} as fetchResponse // 封装的响应
+	public error: fetchError
 	constructor(req: fetchRequest){
 		if (!req.url) {
 			logger.error(`fetch url undefnined!`)

@@ -106,7 +106,7 @@ export default class Store {
 	 * set latest store doc
 	 */
 	async setLast(doc: any){
-		let lastID = (await this.getLast())
+		let lastID = await this.getLast() || null
 		if (lastID !== null) {
 			lastID = lastID._id
 		} else {
@@ -124,5 +124,7 @@ export default class Store {
 	async getAll(){
 		return await this.find({})
 	}
-
+	getDB(){
+		return this.db
+	}
 }

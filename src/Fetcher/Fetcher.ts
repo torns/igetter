@@ -6,7 +6,7 @@ import Engine from '../Engine/Engine'
 export default class Fetcher extends EventEmitter{
 	public id: string // fetcher id
 	private queue: Map<string, Fetch> = new Map // save this fetcher's fetch
-	private callBacks: Map<string, Function> = new Map
+	private callBacks: Map<string, Function> = new Map // request callback function
 	public engine: Engine
 	
 	constructor(){
@@ -44,6 +44,7 @@ export default class Fetcher extends EventEmitter{
 	async request(req: fetchRequest, cb?: Function){
 		let fetchID = this.push(req)
 		return new Promise<Fetch>((resolve, reject) => {
+		debugger
 			this.waitDownload(fetchID, function(resFetch: Fetch){
 				if (cb) {
 					cb(resFetch)

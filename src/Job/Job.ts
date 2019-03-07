@@ -47,6 +47,7 @@ export default abstract class Job extends Fetcher{
 		this.isActive = true
 	}
 	inactive(){
+		this.store.disconnect()
 		delete this.store
 		this.isActive = false
 	}
@@ -54,7 +55,7 @@ export default abstract class Job extends Fetcher{
 	 * set job id
 	 */
 	setID(){
-		this.id =  md5(this.JobName, this.majorVer) // key + class.name 生成md5
+		this.id =  md5(this.JobName, this.majorVer) // key + class.name generate md5
 	}
 	// /**
 	//  * init store 

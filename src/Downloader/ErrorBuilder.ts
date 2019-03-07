@@ -1,4 +1,4 @@
-import { Response } from "superagent";
+import { Response } from 'superagent'
 
 export default function createError(error: any, fetchError: fetchError) {
 	let err = new ErrorBuilder(error, fetchError)

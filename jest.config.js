@@ -2,8 +2,13 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   "roots": [
-    "<rootDir>/test"
+    "<rootDir>/tests"
   ],
   moduleDirectories: ['node_modules', 'src'],
-  "testMatch": [ "**/test/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)" ]
+  "testMatch": [ "**/tests/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)" ],
+  "coverageReporters": [
+    "json-summary", 
+    "text",
+    "lcov"
+  ]
 };

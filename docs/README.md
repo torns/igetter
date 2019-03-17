@@ -7,22 +7,22 @@
 
 - 声明式：IGetter是一个基础的监控型爬虫框架，用户只需编写相应的解析即可。其余的调度、下载、存储由IGetter负责。
 - 易扩展：IGetter使用Tapable暴露爬虫的生命周期，从发出请求到接收到响应整个过程都可控。
-- 监控型：IGetter更擅长以监控信息为目的的爬虫，例如：JavaScript周报更新、BiliBili王老菊视频更新...
+- 监控型：IGetter更擅长以监控信息为目的的爬虫，例如：JavaScript周报更新、BiliBili UP 主视频更新...
 
 # 构成
 
 
 IGetter主要分为Engine、Downloader、Job、Plugin、Store五部分。
 
-**Engine**负责Job的添加、调度，传递Job的请求、Downloader的响应以及插件的注入。
+- **Engine**负责Job的添加、调度，传递Job的请求、Downloader的响应以及插件的注册。
 
-**Downloader**是一个异步并发下载队列，负责下载Engine传递来的请求。使用superagent库来下载，如果想使用其他请求库，替换非常简单。
+- **Downloader**是一个异步并发下载队列，负责下载Engine传递来的请求。使用superagent库来下载，如果想使用其他请求库，替换非常简单。
 
-**Job**是使用者主要关注的地方，在这里主要进行爬虫的解析，存储。希望能利用开源的力量，将所有的Job聚集一起供用户使用，例如：知乎xxx新回答，xxx更新了微博，steamxxx游戏有更新...也是急需贡献的地方！
+- **Job**是使用者主要关注的地方，在这里主要进行爬虫的解析，存储。希望能利用开源的力量，将所有的Job聚集一起供用户使用，例如：知乎xxx新回答，xxx更新了微博，steamxxx游戏有更新...也是急需贡献的地方！
 
-**Plugin**即为插件，IGetter将一个爬虫从发出请求到接收到响应整个过程使用Tapable暴露出来。可以在此做很多事情，例如：随机User-Agent、爬虫性能分析、模拟登录，爬虫监控、代理设置...
+- **Plugin**即为插件，IGetter将一个爬虫从发出请求到接收到响应整个过程使用Tapable暴露出来。可以在此做很多事情，例如：随机User-Agent、爬虫性能分析、模拟登录，爬虫监控、代理设置...
 
-**Store**是IGetter提供的存储工具，使用nedb库，类mongoDB的语法更易使用。当然，如果想使用其他存储库，也可替换。
+- **Store**是IGetter提供的存储工具，使用nedb库，类mongoDB的语法更易使用。当然，如果想使用其他存储库，也可替换。
 
 PS：IGetter的目标是提供一个信息监控、聚合的基础框架，在此之上打算使用Electron或Chrome Extension写一个消息聚合平台。
 
@@ -48,10 +48,10 @@ class YourJob extends Job{
 			url: 'https://example.com'
 		})
 		let resBody = pageFetch.response.body // 获取响应
-		ler res = {}
-		res.title = $('#title', resBody) // 使用cheerio获取title信息
-		res.content = $('#content', resBody) // 使用cheerio获取content信息
-		return res
+		return {
+			title: $('#title', resBody) // 使用cheerio获取title信息,
+			content: $('#content', resBody) // 使用cheerio获取content信息
+		}
 	}
 	async save(res){ // 接收来自run()的数据
 		let store = this.store // 每个Job的存储器, 使用nedb，语法相同

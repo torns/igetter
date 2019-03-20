@@ -27,7 +27,7 @@ IGetter主要分为Engine、Downloader、Job、Plugin、Store五部分。
 PS：IGetter的目标是提供一个信息监控、聚合的基础框架，在此之上打算使用Electron或Chrome Extension写一个消息聚合平台。
 
 <p align="center">
-	<img src="./IGetter.png" alt="alt text" width="600" height="450">
+	<img src="./IGetter.png" alt="alt text" width="500" height="450">
 </p>
 
 # 例子
@@ -48,14 +48,10 @@ class YourJob extends Job{
 			url: 'https://example.com'
 		})
 		let resBody = pageFetch.response.body // 获取响应
-		return {
+		return { // 返回的数据将会交由Engine存储值Store
 			title: $('#title', resBody) // 使用cheerio获取title信息,
 			content: $('#content', resBody) // 使用cheerio获取content信息
 		}
-	}
-	async save(res){ // 接收来自run()的数据
-		let store = this.store // 每个Job的存储器, 使用nedb，语法相同
-		store.insert(res) // 存储数据
 	}
 }
 ```

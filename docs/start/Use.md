@@ -1,5 +1,5 @@
 
-# 面向IGeter使用者
+## 面向 IGeter 使用者
 
 IGetter的使用是非常简单的，例子如下：
 
@@ -21,7 +21,7 @@ E.listen((data) => {
 })
 ```
 
-# 面向Job编写者
+## 面向 Job 编写者
 
 Job的编写、维护是非常耗时耗力的。因为网站的样式都不一样，信息的获取是非常繁琐的。这也是急需大家贡献力量的地方。
 
@@ -82,10 +82,21 @@ class steamcn extends Job{ // 继承Job类
 }
 ```
 
+## 面向 Plugin 编写者
 
+IGetter 的插件机制是基于 [Tapable](https://github.com/webpack/tapable) 的。众所周知的Webpack的插件机制就是使用它的。它的用法很简单，下面我们来写一个给爬虫添加`User-Agent`请求头的例子：
+```ts
+class SetUA extends Plugin{
+  public PluginName = 'Get Fetch Headers'
 
-
-
-
-# 面向Plugin编写者
-
+  public apply(hooks: Hooks) {
+    // hooks 参数暴露出一些事件供使用，例如：请求前，请求时，请求后等等
+    // 每个事件的参数可能会不同，在本例的 beforeFetch 事件中，参数为 Engine 接收到的 Fetch 请求实例
+    let UA = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36`
+    hooks.beforeFetch.tap('Set-UA', fetch => { 
+      fetch.request.headers['User-Agent'] = UA
+    })
+  }
+}
+```
+这样，Engine 收到的每个请求都会携带上`User-Agent`，避免了爬虫被无UA请求头被直接拒绝。

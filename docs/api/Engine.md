@@ -1,5 +1,30 @@
+# Engine
 
 Engine 主要功能有：接收 Job 发出的请求，分发 Downloader 的响应，以及 Job 的调度，Plugin 的引入。
+
+# 属性
+
+## isActive
+
+Engine 是否正在运行。
+- **类型**：Boolean
+- **用法**：
+```ts
+engine.isActive // true or false
+engine.isActive = false // 停止 engine
+```
+
+## config
+
+Engine 的config对象。
+- **类型**：config
+- **用法**：
+```ts
+engine.config // 返回一个 config 对象
+engine.config.concurrency = 6 // 设置engine的并发数为6
+```
+
+# 方法
 
 ## Engine()
 
@@ -29,7 +54,7 @@ let engine = new Engine({
 engine.run()
 ```
 
-## addJob(job: Job)
+## addJob(job)
 
 向引擎添加 Job 实例。
 
@@ -101,16 +126,4 @@ engine.setConfig({
 engine.listen(data: any => {
 	console.log(any)
 })
-```
-
-## 
-
-
-
-- **参数**：
-- **返回类型**：
-- **用法**：
-
-```ts
-
 ```

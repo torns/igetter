@@ -1,0 +1,19 @@
+{
+	"extends": ["tslint-config-alloy"],
+	"linterOptions": {
+		"exclude": ["**/node_modules/**"]
+	},
+	"rules": {
+		"linebreak-style": false,
+		"indent": [true, "spaces", 4],
+		"semicolon": [true, "never"],
+		"arrow-parens": false,
+		"no-object-literal-type-assertion": false,
+		"quotemark": [true, "single"],
+		"ordered-imports": false,
+		"class-name": false,
+		"no-parameter-reassignment": false,
+		"no-this-assignment": false,
+		"one-variable-per-declaration": false
+	}
+}

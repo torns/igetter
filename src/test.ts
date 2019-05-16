@@ -6,8 +6,6 @@ import Plugin from './Plugin/Plugin'
 
 class getHeaders extends Plugin{
   public PluginName = 'Get Fetch Headers'
-  public majorVer = '1'
-  public minorVer = '1'
   public apply(hooks: Hooks) {
     hooks.beforeFetch.tap('get-headers', (fetch) => {
       console.log(fetch.request.headers)
@@ -66,7 +64,7 @@ class steamcn extends Job{
   }
 }
 let e = new Engine({
-  concurrency: 5
+  concurrency: 2
 })
 let d = new DownLoader()
 d.attachEngine(e)
@@ -79,47 +77,6 @@ e.listen((data) => {
 
 export default e
 
-class test extends Job{
-  public JobName = 'TESTTESTTEST'
-  public majorVer = '0'
-  public minorVer = '1'
-  public url: string
-  public constructor(url: string) {
-    super()
-    this.JobName += url
-    this.url = url
-  }
-  public async run() {
-    let req: fetchRequest = {
-      url: this.url
-    }
-    let res = await this.request(req)
-    if (res.error) {
-      console.log('--------------error-------------')
-    } else {
-      console.log(`-------------${res.response.status}---------`)
-    }
-    return false
-  }
-}
-let urls = [
-  'https://juejin.im/search?query=Web%E5%AD%98%E5%82%A8&type',
-  'https://www.nowcoder.com/ta/front-end-interview?query=&asc=true&order=&page=2',
-  'https://juejin.im/book/5bdc715fe51d454e755f75ef',
-  'https://github.com/LarenDorr?tab=stars',
-  'https://segmentfault.com/a/1190000007926921',
-  'https://segmentfault.com/a/1190000005927232',
-  'https://eplover.github.io/pages/2017/04/06/cso.html',
-  'https://www.imooc.com/article/16746',
-  'https://www.douyu.com/6504457',
-  'https://juejin.im/search?query=Web%E5%AD%98%E5%82%A8&type',
-  'https://www.nowcoder.com/ta/front-end-interview?query=&asc=true&order=&page=2',
-  'https://juejin.im/book/5bdc715fe51d454e755f75ef',
-  'https://github.com/LarenDorr?tab=stars'
-]
-urls.forEach(url => {
-  e.addJob(new test(url))
-})
 // e.addJob(new v2ex())
 // e.addJob(new bilibili('王老菊',423895))
 // e.addJob(new javascriptWeek())
@@ -174,3 +131,46 @@ urls.forEach(url => {
 
 // 	}
 // }
+
+
+// class test extends Job{
+//   public JobName = 'TESTTESTTEST'
+//   public majorVer = '0'
+//   public minorVer = '1'
+//   public url: string
+//   public constructor(url: string) {
+//     super()
+//     this.JobName += url
+//     this.url = url
+//   }
+//   public async run() {
+//     let req: fetchRequest = {
+//       url: this.url
+//     }
+//     let res = await this.request(req)
+//     if (res.error) {
+//       console.log('--------------error-------------')
+//     } else {
+//       console.log(`-------------${res.response.status}---------`)
+//     }
+//     return false
+//   }
+// }
+// let urls = [
+//   'https://juejin.im/search?query=Web%E5%AD%98%E5%82%A8&type',
+//   'https://www.nowcoder.com/ta/front-end-interview?query=&asc=true&order=&page=2',
+//   'https://juejin.im/book/5bdc715fe51d454e755f75ef',
+//   'https://github.com/LarenDorr?tab=stars',
+//   'https://segmentfault.com/a/1190000007926921',
+//   'https://segmentfault.com/a/1190000005927232',
+//   'https://eplover.github.io/pages/2017/04/06/cso.html',
+//   'https://www.imooc.com/article/16746',
+//   'https://www.douyu.com/6504457',
+//   'https://juejin.im/search?query=Web%E5%AD%98%E5%82%A8&type',
+//   'https://www.nowcoder.com/ta/front-end-interview?query=&asc=true&order=&page=2',
+//   'https://juejin.im/book/5bdc715fe51d454e755f75ef',
+//   'https://github.com/LarenDorr?tab=stars'
+// ]
+// urls.forEach(url => {
+//   e.addJob(new test(url))
+// })

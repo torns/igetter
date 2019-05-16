@@ -1,5 +1,7 @@
 import Job from './Job'
 
+// TODO: job priority
+// TODO: job done time analyze
 export default class JobPool{
   public waitMaxCount = 20
   private waitJobs: Job[] = [] // waiting job
@@ -11,7 +13,9 @@ export default class JobPool{
    * get appoint amount waiting Job
    */
   public getWaitJobs(amount: number) {
-    return this.waitJobs.splice(0, amount)
+    let jobs =  this.waitJobs.splice(0, amount)
+    this.schedule()
+    return jobs
   }
   /**
    * add job to allJobs
@@ -35,7 +39,6 @@ export default class JobPool{
    * generate waitJob from allJobs
    */
   private schedule() {
-    debugger
     if (this.allJobs.size !== 0 && this.waitJobs.length < this.waitMaxCount) {
       this.allJobs.forEach(async (jobInfo) => {
         let { job, lastRun} = jobInfo
@@ -51,8 +54,5 @@ export default class JobPool{
         }
       })
     }
-    setTimeout(() => {
-      this.schedule()
-    }, 0)
   }
 }

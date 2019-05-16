@@ -4,8 +4,8 @@ import Store from '../Store/Store'
 export default abstract class Plugin{
   public store: Store // Plugin store
   public abstract PluginName: string // plugin name
-   public abstract majorVer: string // plugin major version, store files name is md5(name, majorVer)
-  public abstract minorVer: string //  plugin minor version
+  public majorVer = '1' // plugin major version, store files name is md5(name, majorVer)
+  public  minorVer = '0' //  plugin minor version
   public ID: string
 
   /**

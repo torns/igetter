@@ -6,8 +6,8 @@ import Engine from '../Engine/Engine'
 export default class Fetcher extends EventEmitter{
   public id: string // fetcher id
   public engine: Engine
-  private queue: Map<string, Fetch> = new Map() // save this fetcher's fetch
-  private callBacks: Map<string, Function> = new Map() // request callback function
+  protected queue: Map<string, Fetch> = new Map() // save this fetcher's fetch
+  protected callBacks: Map<string, Function> = new Map() // request callback function
 
   public constructor() {
     super()
@@ -34,7 +34,7 @@ export default class Fetcher extends EventEmitter{
    * reuqest multi fetch, can set callback for every fetch downloaded
    */
   public requests(reqs: fetchRequest[], cb?: Function) {
-    let requests = []
+    let requests = [] as Promise<Fetch>[]
     reqs.forEach(req => {
       requests.push(this.request(req, cb))
     })

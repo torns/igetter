@@ -10,7 +10,7 @@ import Stores from '../Store/Stores'
 
 
 export default class Engine extends EventEmitter{
-  public isActive = true
+  public isActive = false
   public config: config
   public hooks: Hooks = {
     beforeFetch: new SyncHook(['fetch']),
@@ -26,7 +26,6 @@ export default class Engine extends EventEmitter{
   public constructor(cfg: config) {
     super()
     this.config = cfg
-    console.log(this.config)
     this.regHandle()
     this.stores = new Stores()
     this.jobPool = new JobPool()
@@ -36,7 +35,7 @@ export default class Engine extends EventEmitter{
    * launch engine, get and execute job
    */
   public async run() {
-    debugger
+    this.isActive = true
     let lack = this.config.concurrency - this.activeJob.size
     if (lack) {
       this.jobPool.getWaitJobs(lack).forEach(job => {
@@ -50,8 +49,12 @@ export default class Engine extends EventEmitter{
       }
     })
     setTimeout(() => {
+      if (!this.isActive) return
       this.run()
     }, 0)
+  }
+  public stop() {
+    this.isActive = false
   }
   /**
    * add job to JobPoll with job info
@@ -104,7 +107,6 @@ export default class Engine extends EventEmitter{
       }
     })
     this.addListener('detach', (job: Job) => {
-      debugger
       job.inactive()
       this.activeJob.delete(job.id)
       this.jobPool.setLastrun(job.id)

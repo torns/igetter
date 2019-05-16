@@ -97,7 +97,6 @@ export default class Store {
    * set latest store doc
    */
   public async setLast(doc: any) {
-    debugger
     let lastID = await this.getLast() || null
     if (lastID !== null) {
       lastID = lastID._id

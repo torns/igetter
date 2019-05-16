@@ -21,7 +21,7 @@ export default abstract class Job extends Fetcher{
    * start job, include attach engine, run user script, save store, detach engine
    * NOT CALL
    */
-   public async _run(engine: Engine) {
+  public async _run(engine: Engine) {
     this.attachEngine(engine)
     logger.debug(`[job] ${this.JobName} ${this.id} start`)
     let res = await this.run()
@@ -36,13 +36,17 @@ export default abstract class Job extends Fetcher{
   }
   /**
    * save store form job run
-   * NOT CALL
    */
   public active() {
     this.isActive = true
   }
+  /**
+   * change status, release callback func
+   */
   public inactive() {
     this.isActive = false
+    this.callBacks.clear()
+    this.queue.clear()
   }
   /**
    * set job id
@@ -74,6 +78,6 @@ export default abstract class Job extends Fetcher{
    * whether push to wait job queue
    */
   public async willRun() {
-    return Promise.resolve(true)
+    return true
   }
 }

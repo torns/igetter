@@ -15,7 +15,6 @@ export default class Stores{
   }
   public getStore(id: string) {
     let store = this.Stores.get(id)
-    debugger
     if (!store) {
       store = new Store(id)
       this.Stores.set(id, store)
@@ -28,7 +27,6 @@ export default class Stores{
     return await store.getLast()
   }
   public  async setLast(id: string, data: any) {
-    debugger
     let store = this.getStore(id)
     await store.setLast(data)
   }

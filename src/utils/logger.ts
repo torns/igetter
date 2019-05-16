@@ -1,5 +1,5 @@
 import { configure, getLogger } from 'log4js'
-
+// config logger config
 configure({
   appenders: {
     out: {

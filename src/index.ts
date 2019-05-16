@@ -54,7 +54,7 @@ declare global {
     afterFetch: SyncHook
   }
   interface config{
-    concurrency: number, // download concurrency
+    concurrency?: number, // download concurrency
   }
 }
 

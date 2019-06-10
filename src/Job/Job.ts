@@ -15,7 +15,6 @@ export default abstract class Job extends Fetcher{
     this.addListener('run', (engine: Engine) => {
       this._run(engine)
     })
-    this.id =  md5(this.JobName, this.VERSION)
   }
   /**
    * start job, include attach engine, run user script, save store, detach engine
@@ -38,6 +37,9 @@ export default abstract class Job extends Fetcher{
     if (this.JobName === 'IGetter Job') {
       logger.warn(`Job's Name is default name, NOT recommend!`)
     }
+  }
+  public setID(){
+    this.id =  md5(this.JobName, this.VERSION)
   }
   public getStore(id?: string){
     return this.engine.getStore(id || this.id)

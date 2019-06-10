@@ -26,6 +26,7 @@ export default class JobPool{
    * add job to allJobs
    */
   public addJob(job: Job) {
+    job.setID()
     let id = job.id
     let jobInfo: jobInfo = {
       job,

@@ -31,8 +31,7 @@ export default class Store {
   private id: string // Job id
   public constructor(id: string) {
     this.id = id
-    let path = `./data/${id}.json`
-    this.path = path
+    this.path = `./data/${id}.json`
     this.db = new DataStore({
       filename: this.path,
       autoload: true

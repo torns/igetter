@@ -1,6 +1,6 @@
 import * as EventEmitter from 'events'
 import { fetcher as logger } from '../utils/logger'
-import Fetch from './Fetch'
+import Fetch, { fetchRequest } from './Fetch'
 import Engine from '../Engine/Engine'
 
 export default class Fetcher extends EventEmitter{
@@ -33,7 +33,7 @@ export default class Fetcher extends EventEmitter{
   /**
    * reuqest multi fetch, can set callback for every fetch downloaded
    */
-  public requests(reqs: fetchRequest[], cb?: Function) {
+  public async requests(reqs: fetchRequest[], cb?: Function) {
     let requests = [] as Promise<Fetch>[]
     reqs.forEach(req => {
       requests.push(this.request(req, cb))
@@ -41,18 +41,11 @@ export default class Fetcher extends EventEmitter{
     return Promise.all(requests)
   }
   /**
-   * get fetch queue
-   */
-  public getQueue() {
-    return this.queue
-  }
-  /**
    * construct fetch, emit to engine
    */
   private push(req: fetchRequest): Fetch['fetchID'] {
     logger.info(`[Fetcher] ${this.id} recieve job request ${req.method || 'GET'} ${req.url}`)
-    let fetch = new Fetch(req)
-    fetch.setFetcherID(this.id)
+    let fetch = new Fetch(req, this.id)
     this.queue.set(fetch.fetchID, fetch)
     if (this.engine) {
       this.engine.emit('fetch', fetch)

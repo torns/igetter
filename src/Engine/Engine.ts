@@ -1,6 +1,6 @@
 import { SyncHook } from 'tapable'
 import * as EventEmitter from 'events'
-import { engine as logger } from '../utils/logger'
+import { engine as logger, switchLog } from '../utils/logger'
 import DownLoader from '../Downloader/Downloader'
 import Fetch from '../Fetcher/Fetch'
 import Job from '../Job/Job'
@@ -8,24 +8,36 @@ import JobPool from '../Job/JobPool'
 import Plugin from '../Plugin/Plugin'
 import Stores from '../Store/Stores'
 
+interface config{
+  concurrency?: number, // download concurrency,
+  isLog?: boolean // open log
+}
+export interface Hooks{
+  beforeFetch: SyncHook,
+  fetching: SyncHook,
+  afterFetch: SyncHook
+}
 
 export default class Engine extends EventEmitter{
   public isActive = false
-  public config: config
+  public config: config = {
+    concurrency: 4,
+    isLog: false
+  }
   public hooks: Hooks = {
     beforeFetch: new SyncHook(['fetch']),
     fetching: new SyncHook(['request']),
     afterFetch: new SyncHook(['fetch'])
   }
-  private activeJob: Map<string, Job> = new Map() // executing job
+  public activeJob: Map<string, Job> = new Map() // executing job
   private downloader: DownLoader // downloader
   private stores: Stores // stores, save data
   private jobPool: JobPool
   private consumer: Function[] = [] // consumer, consume data
 
-  public constructor(cfg: config) {
+  public constructor(config: config) {
     super()
-    this.config = cfg
+    this.setConfig(config)
     this.regHandle()
     this.stores = new Stores()
     this.jobPool = new JobPool()
@@ -45,7 +57,7 @@ export default class Engine extends EventEmitter{
     this.activeJob.forEach(job => {
       if (!job.isActive) {
         job.active()
-        job._run(this)
+        job.emit('run', this)
       }
     })
     setTimeout(() => {
@@ -57,16 +69,10 @@ export default class Engine extends EventEmitter{
     this.isActive = false
   }
   /**
-   * add job to JobPoll with job info
+   * add job to JobPool with job info
    */
   public addJob(job: Job) {
     this.jobPool.addJob(job)
-  }
-  /**
-   * get active job queue
-   */
-  public getActiveJob() {
-    return this.activeJob
   }
   /**
    * add plugin to engine
@@ -79,6 +85,11 @@ export default class Engine extends EventEmitter{
       ...this.config,
       ...config
     }
+    switchLog(this.config.isLog)
+  }
+  public getStore(id: string) {
+    let store = this.stores.getStore(id)
+    return store
   }
   public listen(cb: Function) {
     this.consumer.push(cb)
@@ -116,7 +127,7 @@ export default class Engine extends EventEmitter{
       this.consumer.forEach(cb => {
         cb(res)
       })
-       this.stores.setLast(res.id, res.data)
+      //  this.stores.setLast(res.id, res.data)
     })
   }
 }

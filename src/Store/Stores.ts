@@ -22,15 +22,7 @@ export default class Stores{
     }
     return store
   }
-  public  async getLast(id: string) {
-    let store = this.getStore(id)
-    return await store.getLast()
-  }
-  public  async setLast(id: string, data: any) {
-    let store = this.getStore(id)
-    await store.setLast(data)
-  }
-  public  cleanStore() {
+  private cleanStore() {
     if (this.Stores.size > this.counts) {
       let key = this.Stores.keys().next().value
       this.Stores.delete(key)

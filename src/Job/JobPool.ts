@@ -1,5 +1,10 @@
 import Job from './Job'
 
+interface jobInfo {
+  job: Job,
+  lastRun: number
+}
+
 // TODO: job priority
 // TODO: job done time analyze
 export default class JobPool{
@@ -21,7 +26,7 @@ export default class JobPool{
    * add job to allJobs
    */
   public addJob(job: Job) {
-    let id = job.setID()
+    let id = job.id
     let jobInfo: jobInfo = {
       job,
       lastRun: -Infinity
@@ -45,12 +50,10 @@ export default class JobPool{
         if (job.isActive || this.waitJobs.includes(job)) {
           return
         }
-        if (await job.willRun()) {
-          let interval = Date.now() - lastRun
-          interval /= 1000
-          if (interval > job.minInterval) {
-            this.waitJobs.push(job)
-          }
+        let interval = Date.now() - lastRun
+        interval /= 1000
+        if (interval > job.minInterval) {
+          this.waitJobs.push(job)
         }
       })
     }

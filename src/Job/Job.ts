@@ -4,24 +4,24 @@ import { job as logger } from '../utils/logger'
 import md5 = require('blueimp-md5')
 import Engine from '../Engine/Engine'
 
-/**
- * job
- */
 export default abstract class Job extends Fetcher{
-  public isActive = false // job whether run
+  public isActive = false // job whether active
   public minInterval = 10  // min run interval (s)
-  public JobName = 'Job' // job name // TODO: undefined name avoid use store
-  public majorVer = '1' // job majorVer, decide store files name
-  public minorVer = '0'// job minorVer
-  public $ = $ // analyze lib
+  public JobName = 'IGetter Job' // job name // TODO: undefined name avoid use store
+  public VERSION = '1.0' // job majorVer, decide store files name
+  public $ = $ // parse lib
   public constructor() {
     super()
+    this.addListener('run', (engine: Engine) => {
+      this._run(engine)
+    })
+    this.id =  md5(this.JobName, this.VERSION)
   }
   /**
    * start job, include attach engine, run user script, save store, detach engine
-   * NOT CALL
    */
-  public async _run(engine: Engine) {
+  private async _run(engine: Engine) {
+    this.checkJob()
     this.attachEngine(engine)
     logger.debug(`[job] ${this.JobName} ${this.id} start`)
     let res = await this.run()
@@ -33,6 +33,14 @@ export default abstract class Job extends Fetcher{
     }
     logger.debug(`[job] ${this.JobName} ${this.id} end`)
     this.detachEngine()
+  }
+  private checkJob() {
+    if (this.JobName === 'IGetter Job') {
+      logger.warn(`Job's Name is default name, NOT recommend!`)
+    }
+  }
+  public getStore(id?: string){
+    return this.engine.getStore(id || this.id)
   }
   /**
    * save store form job run
@@ -47,13 +55,6 @@ export default abstract class Job extends Fetcher{
     this.isActive = false
     this.callBacks.clear()
     this.queue.clear()
-  }
-  /**
-   * set job id
-   */
-  public setID() {
-    this.id =  md5(this.JobName, this.majorVer) // key + class.name generate md5
-    return this.id
   }
   /**
    * attach engine
@@ -74,10 +75,4 @@ export default abstract class Job extends Fetcher{
    * request url, resolve response, return result
    */
   public abstract async run(): Promise<any>
-  /**
-   * whether push to wait job queue
-   */
-  public async willRun() {
-    return true
-  }
 }

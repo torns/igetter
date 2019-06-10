@@ -1,4 +1,5 @@
 import * as request from 'superagent'
+import { fetchRequest } from '../Fetcher/Fetch';
 
 /**
  * create request from fetch.request

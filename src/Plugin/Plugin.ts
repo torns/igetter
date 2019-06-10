@@ -1,5 +1,12 @@
 import md5 = require('blueimp-md5')
 import Store from '../Store/Store'
+// import { Hooks } from '../Engine/Engine';
+import { SyncHook } from 'tapable'
+interface Hooks{
+  beforeFetch: SyncHook,
+  fetching: SyncHook,
+  afterFetch: SyncHook
+}
 
 export default abstract class Plugin{
   public store: Store // Plugin store

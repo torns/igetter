@@ -1,4 +1,5 @@
 import { Response } from 'superagent'
+import { fetchResponse } from '../Fetcher/Fetch';
 
 /**
  * create fetch.response from request response

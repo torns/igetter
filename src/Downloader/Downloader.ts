@@ -1,7 +1,7 @@
 import { AsyncQueue, queue } from 'async'
 import * as EventEmitter from 'events'
 import Engine from '../Engine/Engine'
-import Fetch from '../Fetcher/Fetch'
+import Fetch, { fetchError } from '../Fetcher/Fetch'
 import { downloader as logger } from '../utils/logger'
 import createError from './ErrorBuilder'
 import createRequest from './RequestBuilder'
